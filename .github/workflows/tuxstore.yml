@@ -1,0 +1,29 @@
+# Compila Tux Store y comprueba la secuencia de pruebas en cada push.
+# pruebas/secuencia.txt : las ordenes, una por linea
+# pruebas/esperado.txt  : lineas que DEBEN aparecer en la salida (de su traza a mano)
+name: Tux Store CI
+on: [push, pull_request]
+jobs:
+  compilar-y-probar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compilar con g++ (C++11)
+        run: g++ -std=c++11 -Wall -o tuxstore tuxstore.cpp
+      - name: Ejecutar la secuencia
+        run: tr -d '\r' < pruebas/secuencia.txt | ./tuxstore > salida-ci.txt
+      - name: Comparar con lo esperado
+        run: |
+          fail=0
+          while IFS= read -r l; do
+            l="${l%$'\r'}"
+            [ -z "$l" ] && continue
+            if grep -Fxq -- "$l" salida-ci.txt; then echo "OK    $l"; else echo "FALTA $l"; fail=1; fi
+          done < pruebas/esperado.txt
+          exit $fail
+      - name: Guardar la salida
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: salida-ci
+          path: salida-ci.txt

@@ -1,0 +1,6 @@
+  frente -> htop(1) -> openssh(1) -> discord(3) <- final
+htop: descarga 1 s | inicio 2 | fin 3 | espera 0 | libres 148 MB
+openssh: descarga 2 s | inicio 3 | fin 5 | espera 0 | libres 140 MB
+discord: descarga 24 s | inicio 5 | fin 29 | espera 5 | libres 45 MB
+vlc: descarga 12 s | inicio 31 | fin 43 | espera 0 | libres 0 MB
+E: No hay espacio suficiente para cowsay: necesita 1 MB, libres 0 MB

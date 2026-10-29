@@ -1,0 +1,16 @@
+instalar discord 0
+instalar htop 2
+instalar openssh 3
+fila
+procesar
+procesar
+procesar
+instalar vlc 31
+procesar
+instalar cowsay 35
+procesar
+reporte
+deshacer
+espacio
+guardar
+salir

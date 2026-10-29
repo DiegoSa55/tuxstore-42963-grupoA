@@ -1,0 +1,6 @@
+# Ejecutables y archivos de compilacion
+*.exe
+*.o
+*.layout
+tuxstore
+salida-ci.txt
