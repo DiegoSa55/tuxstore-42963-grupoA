@@ -5,9 +5,13 @@
    Institucion: Universidad Continental
    Semestre   : 2026-20
    Compilador : Dev-C++ (MinGW / GCC, C++11 o superior)
-   NRC        :
-   Grupo      :
-   Integrantes:
+   NRC        : 42963
+   Grupo      : A
+   Integrantes: 
+   Gutierrez Palomino, Airton.
+   Cabana Charrez, Fabricio Abelardo.
+   Neira Huillca, Sebastian Carlos.
+   Salazar Bravo, Diego Sebastian.
    ============================================================= */
 
 #include <iostream>
@@ -101,6 +105,35 @@ bool agregarAlFinal(NodoApp *&catalogo, string nombre, string version, int mb, i
 
 void encolarConPrioridad(NodoFila *&frente, NodoFila *&final, string nombre, int llegada, int prioridad) {
     // TODO R2a
+    NodoFila *nuevo = new NodoFila;
+    nuevo->nombre = nombre;
+    nuevo->llegada = llegada;
+    nuevo->prioridad = prioridad;
+    nuevo->sig = nullptr;
+
+    if (frente == nullptr) {
+        frente = nuevo;
+        final = nuevo;
+    }
+    else if (prioridad < frente->prioridad) {
+        nuevo->sig = frente;
+        frente = nuevo;
+    }
+    else {
+        NodoFila *actual = frente;
+
+        while (actual->sig != nullptr &&
+                actual->sig->prioridad <= prioridad) {
+            actual = actual->sig;
+        }
+
+        nuevo->sig = actual->sig;
+        actual->sig = nuevo;
+
+        if (nuevo->sig == nullptr) {
+            final = nuevo;
+        }
+    }
 }
 
 void leerOrden(string linea, string &orden, string &a1, string &a2, string &a3, string &a4) {
@@ -190,15 +223,152 @@ int main() {
         }
         else if (orden == "agregar") {
             // TODO R1f
+            string nombre = a1;
+            string version = a2;
+            int mb = 0, prioridad = 0;
+
+            bool mbValido = aEntero(a3, mb);
+            bool prioridadValida = aEntero(a4, prioridad);
+
+            if (nombre.empty() || version.empty() ||
+                !mbValido || !prioridadValida ||
+                mb <= 0 || prioridad < 1 || prioridad > 3) {
+                cout << "Datos invalidos para agregar la aplicacion.\n";
+            }
+            else if (buscarApp(catalogo, nombre) != nullptr) {
+                cout << "La aplicacion ya existe en el catalogo.\n";
+            }
+            else if (agregarAlFinal(catalogo, nombre, version, mb, prioridad)) {
+                cout << "Aplicacion agregada: " << nombre << "\n";
+            }
+            else {
+                cout << "No se pudo agregar la aplicacion.\n";
+            }
         }
         else if (orden == "instalar") {
             // TODO R2b
+            string nombre = a1;
+            int llegada = 0;
+
+            if (nombre.empty() || !aEntero(a2, llegada) || llegada < 0) {
+                cout << "Datos invalidos para instalar.\n";
+            }
+            else {
+                NodoApp *app = buscarApp(catalogo, nombre);
+
+                if (app == nullptr) {
+                    cout << "La aplicacion no existe en el catalogo.\n";
+                }
+                else if (app->estado != DISPONIBLE) {
+                    cout << "La aplicacion ya esta en fila o instalada.\n";
+                }
+                else if (llegada < ultimaLlegada) {
+                    cout << "La llegada no puede ser menor que la anterior.\n";
+                }
+                else {
+                    encolarConPrioridad(frente, final, nombre,
+                                        llegada, app->prioridad);
+
+                    app->estado = EN_FILA;
+                    ultimaLlegada = llegada;
+
+                    cout << "Solicitud agregada a la fila: "
+                         << nombre << "\n";
+                }
+            }
         }
         else if (orden == "fila") {
             // TODO R2c
+            if (frente == nullptr) {
+                cout << "La fila está vacía.\n";
+            }
+            else {
+                NodoFila *actual = frente;
+
+                cout << "frente";
+
+                while (actual != nullptr) {
+                    cout << " -> " << actual->nombre
+                         << "(" << actual->prioridad << ")";
+
+                    actual = actual->sig;
+                }
+
+                cout << " <- final\n";
+            }
         }
         else if (orden == "procesar") {
             // TODO R3
+            if (frente == nullptr) {
+                cout << "La fila esta vacia.\n";
+            }
+            else {
+                //Obtenemos la primera solicitud
+                NodoFila *atendido = frente;
+                frente = frente->sig;
+
+                if (frente == nullptr) {
+                    final = nullptr;
+                }
+
+                //Buscamos la aplicacion en el catalogo
+                NodoApp *app = buscarApp(catalogo, atendido->nombre);
+
+                if (app == nullptr) {
+                    cout << "Aplicacion no encontrada.\n";
+                }
+                else if (app->mb > libre) {
+                    cout << "E: No hay espacio suficiente para "
+                         << app->nombre << ": necesita "
+                         << libre << " MBn";
+
+                    app->estado = DISPONIBLE;
+                }
+                else {
+                    //Se calcula el tiempo de descarga
+                    int descarga = (app->mb + VELOCIDAD - 1) / VELOCIDAD;
+
+                    //Calculamos el inicio y fin
+                    int inicio = reloj;
+
+                    if (atendido->llegada > inicio) {
+                        inicio = atendido->llegada;
+                    }
+
+                    int fin = inicio + descarga;
+                    int espera = inicio - atendido->llegada;
+
+                    //Se actualizan los datos
+                    app->inicio = inicio;
+                    app->fin = fin;
+                    app->espera = espera;
+                    app->estado = INSTALADA;
+
+                    reloj = fin;
+                    libre -= app->mb;
+
+                    instalaciones++;
+                    sumaEspera += espera;
+                    mbDescargados += app->mb;
+
+                    //Se registra la instalacion en la pila
+                    NodoBloque *nuevo = new NodoBloque;
+                    nuevo->nombre = app->nombre;
+                    nuevo->mb = app->mb;
+                    nuevo->sig = tope;
+                    tope = nuevo;
+
+                    cout << app->nombre
+                         << ": descarga " << descarga << " s"
+                         << " | inicio " << inicio
+                         << " | fin " << fin
+                         << " | espera " << espera
+                         << " | libres " << libre << " MB\n";
+                }
+
+                //Se libera el nodo atendido de la cola
+                delete atendido;
+            }
         }
         else if (orden == "historial") {
             // TODO R4a
