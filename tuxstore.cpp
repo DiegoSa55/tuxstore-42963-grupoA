@@ -347,7 +347,7 @@ int main() {
             else {
                 NodoFila *actual = frente;
 
-                cout << " frente";
+                cout << "  frente";
 
                 while (actual != nullptr) {
                     cout << " -> " << actual->nombre
