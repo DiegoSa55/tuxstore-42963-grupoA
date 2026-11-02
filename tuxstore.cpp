@@ -126,7 +126,7 @@ bool agregarAlFinal(NodoApp *&catalogo, string nombre, string version, int mb, i
 
 void encolarConPrioridad(NodoFila *&frente, NodoFila *&final, string nombre, int llegada, int prioridad) {
     // TODO R2a
-               }
+}
 void leerOrden(string linea, string &orden, string &a1, string &a2, string &a3, string &a4) {
     string t[8]; int n = 0;
     stringstream ss(linea);
