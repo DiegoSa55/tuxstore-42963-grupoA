@@ -91,18 +91,42 @@ bool aEntero(string s, int &v) {
 
 NodoApp* buscarApp(NodoApp *catalogo, string nombre) {
     // TODO R1a
+     NodoApp * actual = catalogo;
+
+    while(actual != nullptr){
+        if(actual -> nombre == nombre){
+            return actual;
+        }
+        actual = actual->sig;
+    }
     return nullptr;
 }
 
 bool agregarAlFinal(NodoApp *&catalogo, string nombre, string version, int mb, int prioridad) {
     // TODO R1b
-    return false;
+    if (buscarApp(catalogo, nombre) != nullptr) {
+        return false;
+    }
+
+    NodoApp *nuevo = crearApp(nombre, version, mb, prioridad);
+
+    if (catalogo == nullptr) {
+        catalogo = nuevo;
+    }
+    else {
+        NodoApp *actual = catalogo;
+         while (actual->sig != nullptr) {
+            actual = actual->sig;
+        }
+
+        actual->sig = nuevo;
+    }
+    return true;
 }
 
 void encolarConPrioridad(NodoFila *&frente, NodoFila *&final, string nombre, int llegada, int prioridad) {
     // TODO R2a
-}
-
+               }
 void leerOrden(string linea, string &orden, string &a1, string &a2, string &a3, string &a4) {
     string t[8]; int n = 0;
     stringstream ss(linea);
@@ -180,23 +204,61 @@ int main() {
         cout << "> " << linea << endl;
 
         if (orden == "catalogo") {
-            // TODO R1c
-        }
+    // TODO R1c
+    NodoApp *actual = catalogo;
+
+    while (actual != nullptr) {
+        mostrarApp(actual);
+        actual = actual->sig;
+    }
+}
         else if (orden == "buscar") {
             // TODO R1d
+
+    if (a1 == "") {
+        cout << "E: Ingresa un texto para buscar" << endl;
+    } else {
+        NodoApp *actual = catalogo;
+        bool encontrado = false;
+
+        while (actual != nullptr) {
+            if (actual->nombre.find(a1) != string::npos) {
+                mostrarApp(actual);
+                encontrado = true;
+            }
+            actual = actual->sig;
         }
-        else if (orden == "info") {
-            // TODO R1e
+
+        if (!encontrado) {
+            cout << "No se encontraron aplicaciones" << endl;
         }
+    }
+}
+
+            else if (orden == "info") {
+    // TODO R1e
+    if (a1 == "") {
+        cout << "Ingresa el nombre de una aplicacion" << endl;
+    } else {
+        NodoApp *app = buscarApp(catalogo, a1);
+
+        if (app == nullptr) {
+            cout << "E: Aplicacion no encontrada" << endl;
+        } else {
+            mostrarApp(app);
+        }
+    }
+}
         else if (orden == "agregar") {
             // TODO R1f
         }
+        
         else if (orden == "instalar") {
-            // TODO R2b
-        }
+            // TODO R2b      
+			  }  
         else if (orden == "fila") {
             // TODO R2c
-        }
+		}    
         else if (orden == "procesar") {
             // TODO R3
         }
