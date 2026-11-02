@@ -435,18 +435,79 @@ int main() {
         }
         else if (orden == "historial") {
             // TODO R4a
+            if (tope == nullptr) {
+                cout << "  historial vacio" << endl;
+            } else {
+                NodoBloque *p = tope;
+                while (p != nullptr) {
+                    cout << "  [ " << left << setw(12) << p->nombre << setw(5) << p->mb << " MB ]" << endl;
+                    p = p->sig;
+                }
+            }
         }
         else if (orden == "deshacer") {
             // TODO R4b
+            if (tope == nullptr) {
+                cout << "E: No hay bloques instalados" << endl;
+            } else {
+                NodoBloque *desechado = tope;
+                tope = tope->sig;
+
+                NodoApp *app = buscarApp(catalogo, desechado->nombre);
+                if (app != nullptr) {
+                    app->estado = DISPONIBLE;
+                    app->inicio = app->fin = app->espera = -1;
+                }
+                libre += desechado->mb;
+                cout << "  Liberado bloque: " << desechado->nombre << " (" << desechado->mb << " MB)" << endl;
+                delete desechado;
+            }
         }
         else if (orden == "espacio") {
             // TODO R4c
+            int usado = DISCO - libre;
+            cout << "  Disco: " << usado << " MB / " << DISCO << " MB (" << libre << " MB libres)" << endl;
         }
         else if (orden == "prioridad") {
             // TODO R5a
+            int nuevaPrio;
+            if (a1 == "" || !aEntero(a2, nuevaPrio)) {
+                cout << "E: Uso -> prioridad <app> <prioridad>" << endl;
+            } else if (nuevaPrio < 1 || nuevaPrio > 3) {
+                cout << "E: Prioridad debe ser 1, 2 o 3" << endl;
+            } else {
+                NodoApp *p = buscarApp(catalogo, a1);
+                if (p == nullptr) {
+                    cout << "E: App no encontrada" << endl;
+                } else if (p->estado == EN_FILA) {
+                    cout << "E: No se puede cambiar prioridad de una app en fila" << endl;
+                } else {
+                    p->prioridad = nuevaPrio;
+                    cout << "  Prioridad actualizada a " << nuevaPrio << " para " << a1 << endl;
+                }
+            }
         }
         else if (orden == "retirar") {
             // TODO R5b
+            if (a1 == "") {
+                cout << "E: Ingrese el nombre de la app" << endl;
+            } else {
+                NodoApp *p = catalogo, *ant = nullptr;
+                while (p != nullptr && p->nombre != a1) {
+                    ant = p;
+                    p = p->sig;
+                }
+                if (p == nullptr) {
+                    cout << "E: App no encontrada" << endl;
+                } else if (p->estado != DISPONIBLE) {
+                    cout << "E: Solo se pueden retirar apps en estado disponible" << endl;
+                } else {
+                    if (ant == nullptr) catalogo = p->sig;
+                    else ant->sig = p->sig;
+                    delete p;
+                    cout << "  App " << a1 << " retirada del catalogo" << endl;
+                }
+            }
         }
         else if (orden == "guardar") {
             if (frente != nullptr) cout << "E: Procesen la fila antes de guardar" << endl;
