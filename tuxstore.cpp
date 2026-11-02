@@ -342,7 +342,7 @@ int main() {
         else if (orden == "fila") {
             // TODO R2c
             if (frente == nullptr) {
-                cout << "La fila está vacía.\n";
+                cout << "La fila esta vacia.\n";
             }
             else {
                 NodoFila *actual = frente;
